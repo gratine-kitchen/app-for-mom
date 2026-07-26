@@ -49,15 +49,46 @@ echo "  ✓ Dependencies installed"
 # ---- Launch iOS Simulator ----
 echo ""
 echo "[3/4] Launching iOS Simulator..."
+
+# Check if any simulator runtimes exist
+RUNTIMES=$(xcrun simctl list runtimes -j 2>/dev/null | grep -c '"identifier"' || true)
+if [ "$RUNTIMES" -eq 0 ] 2>/dev/null; then
+    echo "ERROR: No iOS simulator runtimes found."
+    echo "  Open Xcode → Settings → Platforms → Download iOS Simulator."
+    exit 1
+fi
+
 SIMULATOR_UDID=$(xcrun simctl list devices | grep -m1 "iPhone.*Booted" | grep -oE '\([A-F0-9-]+\)' | tr -d '()' || true)
 
 if [ -z "$SIMULATOR_UDID" ]; then
-    # No booted simulator — boot the first available iPhone
-    SIMULATOR_UDID=$(xcrun simctl list devices | grep -m1 "iPhone" | grep -oE '\([A-F0-9-]+\)' | tr -d '()')
+    # No booted simulator — find or create one
+    SIMULATOR_UDID=$(xcrun simctl list devices | grep -m1 "iPhone" | grep -oE '\([A-F0-9-]+\)' | tr -d '()' || true)
+
     if [ -z "$SIMULATOR_UDID" ]; then
-        echo "ERROR: No iOS simulator found. Please install one via Xcode."
-        exit 1
+        # No simulators exist at all — create one
+        echo "  No simulator found. Creating a new iPhone simulator..."
+        # Get the latest iPhone device type
+        DEVICE_TYPE=$(xcrun simctl list devicetypes -j 2>/dev/null | python3 -c "
+import json, sys
+types = json.load(sys.stdin)['devicetypes']
+iphones = [t for t in types if 'iPhone' in t['name'] and 'SE' not in t['name']]
+print(iphones[-1]['identifier'] if iphones else '')
+" 2>/dev/null)
+
+        if [ -z "$DEVICE_TYPE" ]; then
+            echo "ERROR: Could not determine a valid iPhone device type."
+            exit 1
+        fi
+
+        SIMULATOR_UDID=$(xcrun simctl create "iPhone" "$DEVICE_TYPE" 2>/dev/null || true)
+        if [ -z "$SIMULATOR_UDID" ]; then
+            echo "ERROR: Failed to create simulator. Check that a runtime is installed:"
+            echo "  Open Xcode → Settings → Platforms → Download iOS Simulator."
+            exit 1
+        fi
+        echo "  Created simulator: $SIMULATOR_UDID"
     fi
+
     echo "  Booting simulator: $SIMULATOR_UDID"
     xcrun simctl boot "$SIMULATOR_UDID" 2>/dev/null || true
     open -a Simulator
