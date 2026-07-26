@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /events/{eventId} {
+      // No authentication — open read/write for shared family use.
+      // Restrict in production if needed.
+      allow read, write: if true;
+    }
+  }
+}
