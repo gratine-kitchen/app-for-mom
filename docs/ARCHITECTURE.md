@@ -1,6 +1,8 @@
 # Technical Architecture Document
 ## App for Mom — Shared Date & Events App
 
+**Last Updated**: 2026-07-26
+
 ### 1. Tech Stack
 
 | Layer | Technology | Version |
