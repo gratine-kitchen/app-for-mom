@@ -24,6 +24,21 @@ if ! command -v flutter &> /dev/null; then
 fi
 echo "  ✓ Flutter SDK found: $(flutter --version 2>/dev/null | head -1 || echo 'unknown')"
 
+if ! command -v xcrun &> /dev/null; then
+    echo "ERROR: xcrun not found. Please install Xcode from the Mac App Store."
+    echo "  After installation, open Xcode once to accept the license, then run:"
+    echo "    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer"
+    exit 1
+fi
+
+if ! xcrun simctl list devices &>/dev/null; then
+    echo "ERROR: simctl not available. Ensure Xcode is installed and selected:"
+    echo "    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer"
+    echo "  Current xcode-select path: $(xcode-select -p 2>/dev/null || echo 'not set')"
+    exit 1
+fi
+echo "  ✓ Xcode tools found"
+
 # ---- Install dependencies ----
 echo ""
 echo "[2/4] Installing Flutter dependencies..."
