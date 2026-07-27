@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../l10n/app_strings.dart';
+import '../l10n/bilingual_date_formatter.dart';
 import '../services/firestore_service.dart';
 
 /// A bottom sheet that allows the user to create a new event with a title
@@ -49,8 +50,8 @@ class _AddEventSheetState extends State<AddEventSheet> {
       initialDate: _selectedDate,
       firstDate: DateTime(now.year, now.month, now.day),
       lastDate: DateTime(now.year + 5),
-      helpText: 'Select event date',
-      fieldLabelText: 'Event date',
+      helpText: AppStrings.selectEventDate,
+      fieldLabelText: AppStrings.eventDateFieldLabel,
     );
 
     if (picked != null) {
@@ -75,7 +76,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save event: $e')),
+          SnackBar(content: Text(AppStrings.failedToSave)),
         );
       }
     } finally {
@@ -118,9 +119,11 @@ class _AddEventSheetState extends State<AddEventSheet> {
 
             // Title
             Text(
-              'New Event',
+              AppStrings.newEvent,
+              textAlign: TextAlign.center,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                height: 1.3,
               ),
             ),
             const SizedBox(height: 20),
@@ -130,15 +133,15 @@ class _AddEventSheetState extends State<AddEventSheet> {
               controller: _titleController,
               autofocus: true,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Event Title',
-                hintText: 'e.g. Family Dinner',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.event),
+              decoration: InputDecoration(
+                labelText: AppStrings.eventTitleLabel,
+                hintText: AppStrings.eventTitleHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.event),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter an event title.';
+                  return AppStrings.pleaseEnterTitle;
                 }
                 return null;
               },
@@ -150,33 +153,36 @@ class _AddEventSheetState extends State<AddEventSheet> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(8),
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Date',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.calendar_today),
-                  suffixIcon: Icon(Icons.arrow_drop_down),
+                decoration: InputDecoration(
+                  labelText: AppStrings.dateLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.calendar_today),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
                 ),
                 child: Text(
-                  DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
-                  style: theme.textTheme.bodyLarge,
+                  BilingualDateFormatter.full(_selectedDate),
+                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.3),
                 ),
               ),
             ),
 
-            // Validation: past-date warning (informational, not blocking
-            // since picker already restricts to today+)
+            // Validation: past-date warning
             if (_isDateToday())
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.info_outline,
                         size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 6),
-                    Text(
-                      'Event is set for today.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
+                    Flexible(
+                      child: Text(
+                        AppStrings.eventIsToday,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          height: 1.3,
+                        ),
                       ),
                     ),
                   ],
@@ -198,7 +204,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
                       ),
                     )
                   : const Icon(Icons.check),
-              label: Text(_isSaving ? 'Saving...' : 'Save Event'),
+              label: Text(_isSaving ? AppStrings.saving : AppStrings.saveEvent),
             ),
           ],
         ),

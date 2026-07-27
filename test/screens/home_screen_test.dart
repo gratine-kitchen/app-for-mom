@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:app_for_mom/l10n/app_strings.dart';
+import 'package:app_for_mom/l10n/bilingual_date_formatter.dart';
 import 'package:app_for_mom/models/event.dart';
 import 'package:app_for_mom/screens/home_screen.dart';
 import 'package:app_for_mom/services/firestore_service.dart';
@@ -61,6 +63,10 @@ Widget buildTestApp(FakeFirestoreService service) {
 void main() {
   late FakeFirestoreService fakeService;
 
+  setUpAll(() async {
+    await initializeDateFormatting('zh_TW', null);
+  });
+
   setUp(() {
     fakeService = FakeFirestoreService();
   });
@@ -75,15 +81,14 @@ void main() {
       fakeService.emitEvents([]);
       await tester.pump();
 
-      final todayFormatted =
-          DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
+      final todayFormatted = BilingualDateFormatter.full(DateTime.now());
 
       // Find the date text with large font
       final dateFinder = find.text(todayFormatted);
       expect(dateFinder, findsOneWidget);
 
       final textWidget = tester.widget<Text>(dateFinder);
-      expect(textWidget.style?.fontSize, 40);
+      expect(textWidget.style?.fontSize, 26);
       expect(textWidget.style?.fontWeight, FontWeight.bold);
     });
 
@@ -92,8 +97,8 @@ void main() {
       fakeService.emitEvents([]);
       await tester.pump();
 
-      expect(find.text('No upcoming events'), findsOneWidget);
-      expect(find.text('Tap the + button to add one!'), findsOneWidget);
+      expect(find.text(AppStrings.noUpcomingEvents), findsOneWidget);
+      expect(find.text(AppStrings.tapPlusToAdd), findsOneWidget);
     });
 
     testWidgets('should show loading indicator while stream is pending',
@@ -144,7 +149,8 @@ void main() {
       await tester.pump();
 
       expect(find.text('Today Event'), findsOneWidget);
-      expect(find.textContaining('Today ·'), findsOneWidget);
+      // Verify the date badge is rendered (day number + month label)
+      expect(find.text('${today.day}'), findsOneWidget);
     });
 
     testWidgets('should have a FAB', (tester) async {
@@ -161,7 +167,7 @@ void main() {
       fakeService.emitError(Exception('Network error'));
       await tester.pump();
 
-      expect(find.text('Could not load events.'), findsOneWidget);
+      expect(find.text(AppStrings.couldNotLoadEvents), findsOneWidget);
     });
   });
 }

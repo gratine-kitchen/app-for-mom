@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:app_for_mom/l10n/app_strings.dart';
 import 'package:app_for_mom/models/event.dart';
 import 'package:app_for_mom/screens/add_event_sheet.dart';
 import 'package:app_for_mom/services/firestore_service.dart';
@@ -56,6 +58,10 @@ class _MockNavigatorContext {
 void main() {
   late FakeFirestoreService fakeService;
 
+  setUpAll(() async {
+    await initializeDateFormatting('zh_TW', null);
+  });
+
   setUp(() {
     fakeService = FakeFirestoreService();
   });
@@ -92,9 +98,9 @@ void main() {
         (tester) async {
       await openSheet(tester);
 
-      expect(find.text('New Event'), findsOneWidget);
+      expect(find.text(AppStrings.newEvent), findsOneWidget);
       expect(find.byType(TextFormField), findsOneWidget);
-      expect(find.text('Date'), findsOneWidget);
+      expect(find.text(AppStrings.dateLabel), findsOneWidget);
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
     });
 
@@ -103,10 +109,10 @@ void main() {
       await openSheet(tester);
 
       // Tap save without entering a title
-      await tester.tap(find.text('Save Event'));
+      await tester.tap(find.text(AppStrings.saveEvent));
       await tester.pumpAndSettle();
 
-      expect(find.text('Please enter an event title.'), findsOneWidget);
+      expect(find.text(AppStrings.pleaseEnterTitle), findsOneWidget);
       expect(fakeService.lastTitle, isNull); // Should not have saved
     });
 
@@ -118,7 +124,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save
-      await tester.tap(find.text('Save Event'));
+      await tester.tap(find.text(AppStrings.saveEvent));
       await tester.pumpAndSettle();
 
       // The sheet should be dismissed, and the service should have been called
@@ -134,11 +140,11 @@ void main() {
       await tester.enterText(find.byType(TextFormField), 'Test Event');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Save Event'));
+      await tester.tap(find.text(AppStrings.saveEvent));
       await tester.pumpAndSettle();
 
       // Should show an error snackbar
-      expect(find.textContaining('Failed to save event'), findsOneWidget);
+      expect(find.textContaining(AppStrings.failedToSave), findsOneWidget);
     });
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
@@ -8,6 +9,8 @@ import 'services/firestore_service_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('zh_TW', null);
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

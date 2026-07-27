@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/app_strings.dart';
+import '../l10n/bilingual_date_formatter.dart';
 import '../models/event.dart';
 import '../services/firestore_service.dart';
 import 'add_event_sheet.dart';
@@ -29,7 +31,7 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAddEventSheet(context),
-        tooltip: 'Add Event',
+        tooltip: AppStrings.addEventTooltip,
         child: const Icon(Icons.add),
       ),
     );
@@ -50,12 +52,12 @@ class _DateDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatted = DateFormat('EEEE, MMMM d, yyyy').format(date);
+    final formatted = BilingualDateFormatter.full(date);
     final theme = Theme.of(context);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: const BorderRadius.vertical(
@@ -68,17 +70,19 @@ class _DateDisplay extends StatelessWidget {
             formatted,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 40,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onPrimaryContainer,
-              height: 1.3,
+              height: 1.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
-            'Upcoming Events',
+            AppStrings.upcomingEvents,
+            textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+              height: 1.3,
             ),
           ),
         ],
@@ -118,7 +122,7 @@ class _EventList extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error),
                   const SizedBox(height: 12),
                   Text(
-                    'Could not load events.',
+                    AppStrings.couldNotLoadEvents,
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -152,7 +156,7 @@ class _EventList extends StatelessWidget {
                           .withValues(alpha: 0.3)),
                   const SizedBox(height: 16),
                   Text(
-                    'No upcoming events',
+                    AppStrings.noUpcomingEvents,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: Theme.of(context)
                               .colorScheme
@@ -162,7 +166,7 @@ class _EventList extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tap the + button to add one!',
+                    AppStrings.tapPlusToAdd,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context)
                               .colorScheme
@@ -198,14 +202,15 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateFormatted = DateFormat('MMM d, yyyy').format(event.date);
-    final weekday = DateFormat('EEEE').format(event.date);
+    final dateFormatted = BilingualDateFormatter.compact(event.date);
 
     // Check if the event is today.
     final now = DateTime.now();
     final isToday = event.date.year == now.year &&
         event.date.month == now.month &&
         event.date.day == now.day;
+
+    final monthLabel = DateFormat('M月', 'zh_TW').format(event.date);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -239,7 +244,7 @@ class _EventCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    DateFormat('MMM').format(event.date),
+                    monthLabel,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -269,9 +274,10 @@ class _EventCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    isToday ? 'Today · $weekday' : '$weekday, $dateFormatted',
+                    dateFormatted,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      height: 1.3,
                     ),
                   ),
                 ],
