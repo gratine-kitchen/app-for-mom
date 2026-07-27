@@ -61,4 +61,26 @@ class AppStrings {
 
   /// Error when saving fails
   static const String failedToSave = '儲存失敗\nFailed to save event';
+
+  // ---------------------------------------------------------------------------
+  // Passcode Screen (web-only)
+  // ---------------------------------------------------------------------------
+
+  /// Passcode screen title
+  static const String enterPasscode = '請輸入密碼\nEnter passcode';
+
+  /// Passcode screen subtitle
+  static const String passcodeHint = '輸入家庭密碼以繼續\nEnter the family passcode to continue';
+
+  /// Passcode text field label
+  static const String passcodeLabel = '密碼 / Passcode';
+
+  /// Passcode field hint
+  static const String passcodeFieldHint = '請輸入密碼';
+
+  /// Unlock button
+  static const String unlock = '解鎖 / Unlock';
+
+  /// Wrong passcode error
+  static const String wrongPasscode = '密碼錯誤，請重試。\nWrong passcode, please try again.';
 }

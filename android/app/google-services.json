@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "213660407692",
+    "project_id": "app-for-mom-d54a2",
+    "storage_bucket": "app-for-mom-d54a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213660407692:android:2772c81910bed9546f28a9",
+        "android_client_info": {
+          "package_name": "com.appformom.app_for_mom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzTxIddLX8nqs9w2-kLkvdS3-TSUV91eg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

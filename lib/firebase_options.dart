@@ -2,21 +2,66 @@
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, TargetPlatform;
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// Example:
+/// ```dart
+/// import 'firebase_options.dart';
+/// // ...
+/// await Firebase.initializeApp(
+///   options: DefaultFirebaseOptions.currentPlatform,
+/// );
+/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
     switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
       case TargetPlatform.iOS:
         return ios;
+      case TargetPlatform.macOS:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.windows:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       default:
         throw UnsupportedError(
-          'DefaultFirebaseOptions are not configured for this platform. '
-          'Only iOS is supported.',
+          'DefaultFirebaseOptions are not supported for this platform.',
         );
     }
   }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAUxyDjo4t-mcJusH3bdfmsiGVa_94VzxU',
+    appId: '1:213660407692:web:612d6729c4b75c736f28a9',
+    messagingSenderId: '213660407692',
+    projectId: 'app-for-mom-d54a2',
+    authDomain: 'app-for-mom-d54a2.firebaseapp.com',
+    storageBucket: 'app-for-mom-d54a2.firebasestorage.app',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDzTxIddLX8nqs9w2-kLkvdS3-TSUV91eg',
+    appId: '1:213660407692:android:2772c81910bed9546f28a9',
+    messagingSenderId: '213660407692',
+    projectId: 'app-for-mom-d54a2',
+    storageBucket: 'app-for-mom-d54a2.firebasestorage.app',
+  );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDjcPmJINs5UXNJpKgDsaJwnF9iy2jv13s',
