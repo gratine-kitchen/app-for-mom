@@ -25,6 +25,16 @@ class _PasscodeGateState extends State<PasscodeGate> {
   bool _unlocking = false;
 
   @override
+  void initState() {
+    super.initState();
+    // TODO: Remove before production — prepopulates passcode during development.
+    _controller.text = _familyPasscode;
+    _controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: _familyPasscode.length),
+    );
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
