@@ -1,10 +1,14 @@
+import 'dart:math';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../games/math_quiz_game.dart';
 import '../../l10n/app_strings.dart';
 
-/// Full-screen arithmetic quiz with multiple-choice answers.
+/// Full-screen arithmetic quiz with multiple-choice answers,
+/// animated feedback overlay, and sound effects.
 class MathQuizScreen extends StatefulWidget {
   const MathQuizScreen({super.key});
 
@@ -12,41 +16,82 @@ class MathQuizScreen extends StatefulWidget {
   State<MathQuizScreen> createState() => _MathQuizScreenState();
 }
 
-class _MathQuizScreenState extends State<MathQuizScreen> {
+class _MathQuizScreenState extends State<MathQuizScreen>
+    with SingleTickerProviderStateMixin {
   late MathQuizGame _game;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
-  /// Whether we are currently showing feedback (correct/wrong flash).
+  // ---- Feedback state ----
   bool _showingFeedback = false;
-
-  /// The index of the option the user selected (-1 = none yet).
+  bool? _lastAnswerCorrect;
   int? _selectedOptionIndex;
+
+  // ---- Animation ----
+  late AnimationController _animController;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _shakeAnim;
 
   @override
   void initState() {
     super.initState();
     _game = MathQuizGame();
+
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // Bouncy scale-in for correct
+    _scaleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    // Gentle horizontal shake for wrong
+    _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
+    );
   }
 
-  void _onOptionSelected(int selectedValue) {
+  @override
+  void dispose() {
+    _animController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  void _onOptionSelected(int selectedValue) async {
     if (_showingFeedback || _game.isFinished) return;
 
     final isCorrect = _game.checkAnswer(selectedValue);
+    final question = _game.questions[_game.currentIndex - 1];
+
+    // Play sound effect
+    await _audioPlayer.play(
+      AssetSource(isCorrect ? 'audio/correct.wav' : 'audio/wrong.wav'),
+    );
 
     HapticFeedback.lightImpact();
 
     setState(() {
       _showingFeedback = true;
-      // Find which option was tapped so we can highlight it.
-      final question = _game.questions[_game.currentIndex - 1];
+      _lastAnswerCorrect = isCorrect;
       _selectedOptionIndex = question.options.indexOf(selectedValue);
     });
 
+    // Trigger animation
+    _animController.forward(from: 0);
+
+    // Hold feedback, then advance
     Future.delayed(
-      isCorrect ? const Duration(milliseconds: 600) : const Duration(milliseconds: 1000),
+      const Duration(milliseconds: 1100),
       () {
         if (!mounted) return;
         setState(() {
           _showingFeedback = false;
+          _lastAnswerCorrect = null;
           _selectedOptionIndex = null;
         });
       },
@@ -105,52 +150,59 @@ class _MathQuizScreenState extends State<MathQuizScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-
-              // ---- Question ----
-              Text(
-                question.displayText,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                  height: 1.3,
-                ),
+        child: Stack(
+          children: [
+            // ---- Quiz content ----
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const Spacer(flex: 2),
+                  Text(
+                    question.displayText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                      height: 1.3,
+                    ),
+                  ),
+                  const Spacer(flex: 1),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 2.2,
+                      children: question.options.map((value) {
+                        return _AnswerButton(
+                          value: value,
+                          correctAnswer: question.answer,
+                          showingFeedback: _showingFeedback,
+                          isSelected: question.options.indexOf(value) ==
+                              _selectedOptionIndex,
+                          onTap: () => _onOptionSelected(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const Spacer(flex: 2),
+                ],
               ),
+            ),
 
-              const Spacer(flex: 1),
-
-              // ---- Answer Grid (2×2) ----
-              SizedBox(
-                width: double.infinity,
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 2.2,
-                  children: question.options.map((value) {
-                    return _AnswerButton(
-                      value: value,
-                      correctAnswer: question.answer,
-                      showingFeedback: _showingFeedback,
-                      isSelected: question.options.indexOf(value) ==
-                          _selectedOptionIndex,
-                      onTap: () => _onOptionSelected(value),
-                    );
-                  }).toList(),
-                ),
+            // ---- Feedback Overlay ----
+            if (_showingFeedback && _lastAnswerCorrect != null)
+              _FeedbackOverlay(
+                isCorrect: _lastAnswerCorrect!,
+                scaleAnim: _scaleAnim,
+                shakeAnim: _shakeAnim,
               ),
-
-              const Spacer(flex: 2),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -179,7 +231,9 @@ class _MathQuizScreenState extends State<MathQuizScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  correct == total ? Icons.emoji_events : Icons.celebration_outlined,
+                  correct == total
+                      ? Icons.emoji_events
+                      : Icons.celebration_outlined,
                   size: 72,
                   color: theme.colorScheme.primary,
                 ),
@@ -221,7 +275,84 @@ class _MathQuizScreenState extends State<MathQuizScreen> {
   }
 }
 
-/// A single answer option button with feedback coloring.
+// =============================================================================
+// Feedback Overlay
+// =============================================================================
+
+class _FeedbackOverlay extends StatelessWidget {
+  final bool isCorrect;
+  final Animation<double> scaleAnim;
+  final Animation<double> shakeAnim;
+
+  const _FeedbackOverlay({
+    required this.isCorrect,
+    required this.scaleAnim,
+    required this.shakeAnim,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = isCorrect ? Colors.green : Colors.red;
+    final icon = isCorrect ? Icons.check_circle : Icons.cancel;
+    final text = isCorrect ? AppStrings.correctAnswer : AppStrings.wrongAnswer;
+
+    return AnimatedBuilder(
+      animation: scaleAnim,
+      builder: (context, child) {
+        final shakeOffset =
+            sin(shakeAnim.value * 8 * 3.14159) * (1 - shakeAnim.value) * 14;
+
+        return Positioned.fill(
+          child: IgnorePointer(
+            child: Center(
+              child: Transform.translate(
+                offset: Offset(shakeOffset, 0),
+                child: Transform.scale(
+                  scale: scaleAnim.value,
+                  child: Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    color: theme.colorScheme.surface,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 28,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(icon, size: 64, color: color),
+                          const SizedBox(height: 12),
+                          Text(
+                            text,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// =============================================================================
+// Answer Button
+// =============================================================================
+
 class _AnswerButton extends StatelessWidget {
   final int value;
   final int correctAnswer;
@@ -241,7 +372,6 @@ class _AnswerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Determine button color based on feedback state.
     Color? backgroundColor;
     Color? foregroundColor;
 
@@ -265,7 +395,10 @@ class _AnswerButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
-          textStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+          ),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
