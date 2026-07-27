@@ -6,5 +6,10 @@ service cloud.firestore {
       // Restrict in production if needed.
       allow read, write: if true;
     }
+
+    match /videos/{videoId} {
+      // Same open access as events — shared family use.
+      allow read, write: if true;
+    }
   }
 }

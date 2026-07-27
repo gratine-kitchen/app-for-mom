@@ -7,6 +7,7 @@ import '../models/event.dart';
 import '../services/firestore_service.dart';
 import 'add_event_sheet.dart';
 import 'games/game_selector_sheet.dart';
+import 'videos/videos_screen.dart';
 
 /// Main screen displaying today's date in a large font and a list of
 /// upcoming shared events.
@@ -22,12 +23,9 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.games_outlined),
-            tooltip: AppStrings.gamesTooltip,
-            onPressed: () => GameSelectorSheet.show(context),
-          ),
+        actions: const [
+          // ---- Command Bar ----
+          _CommandBar(),
         ],
       ),
       body: SafeArea(
@@ -296,6 +294,108 @@ class _EventCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Command Bar Widget
+// ---------------------------------------------------------------------------
+
+/// A horizontal scrollable row of command buttons (icon + label) displayed
+/// in the AppBar. Supports adding more buttons in the future.
+class _CommandBar extends StatelessWidget {
+  const _CommandBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          _CommandButton(
+            icon: Icons.games_outlined,
+            label: AppStrings.gamesLabel,
+            onTap: () => GameSelectorSheet.show(context),
+          ),
+          _CommandButton(
+            icon: Icons.video_library_outlined,
+            label: AppStrings.videosLabel,
+            onTap: () {
+              // Navigate to videos screen via the HomeScreen's firestoreService.
+              // We walk up the widget tree to find HomeScreen's service.
+              final home = context.findAncestorWidgetOfExactType<HomeScreen>();
+              if (home != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        VideosScreen(firestoreService: home.firestoreService),
+                  ),
+                );
+              }
+            },
+          ),
+          // Future command buttons go here...
+        ],
+      ),
+    );
+  }
+}
+
+/// A single command button with an icon and a short bilingual text caption.
+class _CommandButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _CommandButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSecondaryContainer,
+                  fontWeight: FontWeight.w600,
+                  height: 1.1,
+                  fontSize: 9,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

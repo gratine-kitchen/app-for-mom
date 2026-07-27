@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:app_for_mom/l10n/app_strings.dart';
 import 'package:app_for_mom/l10n/bilingual_date_formatter.dart';
 import 'package:app_for_mom/models/event.dart';
+import 'package:app_for_mom/models/video.dart';
 import 'package:app_for_mom/screens/home_screen.dart';
 import 'package:app_for_mom/services/firestore_service.dart';
 
@@ -48,6 +49,26 @@ class FakeFirestoreService implements FirestoreService {
     _events.removeWhere((e) => e.id == id);
     _controller.add(List.unmodifiable(_events));
   }
+
+  // ---- Video stubs (not used by HomeScreen) ----
+
+  @override
+  Stream<List<Video>> getVideos() => Stream.value([]);
+
+  @override
+  Future<String> addVideo(
+      {required String title, required String youtubeId}) async {
+    return '';
+  }
+
+  @override
+  Future<void> updateVideo(
+      {required String id,
+      required String title,
+      required String youtubeId}) async {}
+
+  @override
+  Future<void> deleteVideo(String id) async {}
 
   void dispose() {
     _controller.close();

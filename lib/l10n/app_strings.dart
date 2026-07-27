@@ -91,6 +91,9 @@ class AppStrings {
   /// Games button tooltip (AppBar)
   static const String gamesTooltip = '小遊戲 / Games';
 
+  /// Games button label (command bar)
+  static const String gamesLabel = '小遊戲\nGames';
+
   /// Game selector sheet title
   static const String selectGame = '選擇遊戲\nSelect a Game';
 
@@ -132,4 +135,66 @@ class AppStrings {
 
   /// Operator display for subtraction
   static const String operatorSub = '−';
+
+  // ---------------------------------------------------------------------------
+  // Videos
+  // ---------------------------------------------------------------------------
+
+  /// Videos command bar button label
+  static const String videosLabel = '影片\nVideos';
+
+  /// Videos screen title
+  static const String videosTitle = '影片列表\nVideos';
+
+  /// FAB tooltip for adding a video
+  static const String addVideoTooltip = '新增影片\nAdd Video';
+
+  /// Add video sheet title
+  static const String addVideo = '新增影片\nAdd Video';
+
+  /// Add video button label
+  static const String addVideoLabel = '新增影片\nAdd Video';
+
+  /// Edit video sheet title
+  static const String editVideo = '編輯影片\nEdit Video';
+
+  /// Update video button label
+  static const String updateVideo = '更新影片\nUpdate Video';
+
+  /// Empty state: no videos yet
+  static const String noVideos = '沒有影片\nNo videos yet';
+
+  /// Error state when video stream fails
+  static const String couldNotLoadVideos = '無法載入影片。\nCould not load videos.';
+
+  /// Video title field label
+  static const String videoTitleLabel = '影片標題 / Video Title';
+
+  /// Video title field hint
+  static const String videoTitleHint = '例如：太極拳教學\ne.g. Tai Chi Tutorial';
+
+  /// YouTube URL field label
+  static const String youtubeUrlLabel = 'YouTube 網址 / YouTube URL';
+
+  /// YouTube URL field hint
+  static const String youtubeUrlHint =
+      '貼上 YouTube 連結或影片 ID\nPaste YouTube link or video ID';
+
+  /// Validation: empty URL
+  static const String pleaseEnterUrl =
+      '請輸入 YouTube 網址。\nPlease enter a YouTube URL.';
+
+  /// Validation: invalid YouTube URL
+  static const String invalidYoutubeUrl =
+      '無效的 YouTube 網址。\nInvalid YouTube URL.';
+
+  /// Delete confirmation dialog title
+  static const String deleteVideoTitle = '刪除影片\nDelete Video';
+
+  /// Delete confirmation dialog body
+  static const String deleteVideoConfirm =
+      '確定要刪除此影片嗎？\nAre you sure you want to delete this video?';
+
+  /// Delete button label
+  static const String deleteLabel = '刪除\nDelete';
 }

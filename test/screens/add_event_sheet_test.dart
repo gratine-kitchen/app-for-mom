@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:app_for_mom/l10n/app_strings.dart';
 import 'package:app_for_mom/models/event.dart';
+import 'package:app_for_mom/models/video.dart';
 import 'package:app_for_mom/screens/add_event_sheet.dart';
 import 'package:app_for_mom/services/firestore_service.dart';
 
@@ -32,6 +33,26 @@ class FakeFirestoreService implements FirestoreService {
 
   @override
   Future<void> deleteEvent(String id) async {}
+
+  // ---- Video stubs (not used by AddEventSheet) ----
+
+  @override
+  Stream<List<Video>> getVideos() => Stream.value([]);
+
+  @override
+  Future<String> addVideo(
+      {required String title, required String youtubeId}) async {
+    return '';
+  }
+
+  @override
+  Future<void> updateVideo(
+      {required String id,
+      required String title,
+      required String youtubeId}) async {}
+
+  @override
+  Future<void> deleteVideo(String id) async {}
 }
 
 Widget buildTestApp(FakeFirestoreService service) {

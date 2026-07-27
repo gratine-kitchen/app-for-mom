@@ -113,5 +113,90 @@ void main() {
       expect(id.isNotEmpty, isTrue);
     });
   });
+
+  // -----------------------------------------------------------------------
+  // Video CRUD tests
+  // -----------------------------------------------------------------------
+  group('FirestoreService - Videos', () {
+    test('addVideo should create a document with correct fields', () async {
+      final id = await service.addVideo(
+        title: 'Tai Chi Tutorial',
+        youtubeId: 'dQw4w9WgXcQ',
+      );
+
+      final doc = await fakeFirestore.collection('videos').doc(id).get();
+
+      expect(doc.exists, isTrue);
+      expect(doc.data()!['title'], 'Tai Chi Tutorial');
+      expect(doc.data()!['youtubeId'], 'dQw4w9WgXcQ');
+      expect(doc.data()!['addedAt'], isA<Timestamp>());
+    });
+
+    test('addVideo should return a valid document ID', () async {
+      final id = await service.addVideo(
+        title: 'Test Video',
+        youtubeId: 'abcdef12345',
+      );
+
+      expect(id, isA<String>());
+      expect(id.isNotEmpty, isTrue);
+    });
+
+    test('getVideos should stream all videos ordered by most recent first',
+        () async {
+      await service.addVideo(title: 'First Video', youtubeId: 'aaa111bbb22');
+      await service.addVideo(title: 'Second Video', youtubeId: 'ccc333ddd44');
+
+      final videos = await service.getVideos().first;
+
+      expect(videos.length, 2);
+      // Most recently added should be first (descending order).
+      expect(videos[0].title, 'Second Video');
+      expect(videos[1].title, 'First Video');
+    });
+
+    test('getVideos should return empty list when no videos exist', () async {
+      final videos = await service.getVideos().first;
+
+      expect(videos, isEmpty);
+    });
+
+    test('updateVideo should change title and youtubeId', () async {
+      final id = await service.addVideo(
+        title: 'Original Title',
+        youtubeId: 'orig1234567',
+      );
+
+      await service.updateVideo(
+        id: id,
+        title: 'Updated Title',
+        youtubeId: 'upda1234567',
+      );
+
+      final doc = await fakeFirestore.collection('videos').doc(id).get();
+      expect(doc.data()!['title'], 'Updated Title');
+      expect(doc.data()!['youtubeId'], 'upda1234567');
+      // addedAt should remain unchanged
+      expect(doc.data()!['addedAt'], isA<Timestamp>());
+    });
+
+    test('deleteVideo should remove the correct document', () async {
+      final id = await service.addVideo(
+        title: 'To Delete',
+        youtubeId: 'del12345678',
+      );
+
+      // Verify it exists
+      var doc = await fakeFirestore.collection('videos').doc(id).get();
+      expect(doc.exists, isTrue);
+
+      // Delete it
+      await service.deleteVideo(id);
+
+      // Verify it's gone
+      doc = await fakeFirestore.collection('videos').doc(id).get();
+      expect(doc.exists, isFalse);
+    });
+  });
 }
 
