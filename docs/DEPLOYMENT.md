@@ -59,7 +59,96 @@ If a composite index is needed for the `events` collection query, Firestore will
 
 ---
 
-## 3. iOS Setup & Deployment
+## 3. Web Setup & Deployment
+
+The app supports running in a web browser (Chrome recommended). This is useful for quick testing or for family members who prefer using a computer.
+
+On web, the app shows a **passcode gate** before the home screen (unlike native apps which skip this gate).
+
+### 3.1 Initial Setup
+
+No additional setup needed — the web platform is already configured. The `web/` directory contains `index.html` and the Firebase web configuration is embedded via `lib/firebase_options.dart`.
+
+### 3.2 Run Locally (Development)
+
+```bash
+flutter pub get
+flutter run -d chrome
+```
+
+Or use the startup script which detects the available platform:
+
+```bash
+./scripts/startup.sh
+```
+
+This launches the app in Chrome with hot-reload enabled. Make code changes and save — the browser refreshes automatically.
+
+### 3.3 Build for Production
+
+```bash
+flutter build web --release
+```
+
+The output is generated at `build/web/`. You can serve it locally to test:
+
+```bash
+cd build/web
+python3 -m http.server 8000
+```
+
+Then open http://localhost:8000 in a browser.
+
+### 3.4 Deploy via Firebase Hosting (Recommended)
+
+Firebase Hosting is free, fast, and provides HTTPS by default.
+
+**One-time setup:**
+
+```bash
+firebase init hosting
+```
+
+- Select **Use an existing project** → `app-for-mom-d54a2`
+- Set `build/web` as the public directory
+- Configure as a single-page app: **Yes** (so Flutter's routing works)
+- Overwrite `index.html`: **No**
+
+**Deploy:**
+
+```bash
+flutter build web --release
+firebase deploy --only hosting
+```
+
+After deployment, Firebase prints a URL like:
+```
+https://app-for-mom-d54a2.web.app
+```
+
+Share this URL with family members — they can open it in any browser on their computer or tablet.
+
+**Re-deploy after updates:**
+
+```bash
+flutter build web --release && firebase deploy --only hosting
+```
+
+### 3.5 Browser Compatibility
+
+| Browser | Status |
+|---|---|
+| Chrome | ✅ Fully supported |
+| Edge | ✅ Fully supported |
+| Safari | ✅ Supported |
+| Firefox | ✅ Supported |
+| Mobile browsers | ⚠️ Layout may vary; native apps recommended for phones |
+
+**Note for tablets:** Family members using iPads or Android tablets can either install the native app or use the web version in their tablet's browser.
+
+---
+
+## 4. iOS Setup & Deployment
 
 ### 3.1 Initial Setup
 
@@ -115,9 +204,9 @@ Then in Xcode:
 
 ---
 
-## 4. Android Setup & Deployment
+## 5. Android Setup & Deployment
 
-### 4.1 Initial Setup
+### 5.1 Initial Setup
 
 Create the Android platform directory and register with Firebase:
 
@@ -135,7 +224,7 @@ case TargetPlatform.android:
   return android;  // ← this should now exist
 ```
 
-### 4.2 Run on Emulator (Development)
+### 5.2 Run on Emulator (Development)
 
 ```bash
 flutter emulators --launch <emulator_id>
@@ -147,7 +236,7 @@ Or create a new emulator in Android Studio:
 - Choose a Pixel device with a recent API level
 - Launch and run `flutter run`
 
-### 4.3 Distribute via Direct APK (Easiest — Free)
+### 5.3 Distribute via Direct APK (Easiest — Free)
 
 No store, no account needed. Ideal for small family groups.
 
@@ -168,7 +257,7 @@ build/app/outputs/flutter-apk/app-release.apk
 
 **Note:** Direct APKs don't auto-update. You'll need to send a new APK when you make changes.
 
-### 4.4 Distribute via Google Play Store (Polished — $25 one-time)
+### 5.4 Distribute via Google Play Store (Polished — $25 one-time)
 
 Best if you want auto-updates and a professional feel.
 
@@ -184,7 +273,7 @@ Best if you want auto-updates and a professional feel.
 6. Set up **Internal Testing** track — add family members' Google emails
 7. They get a Play Store link and install like any other app
 
-### 4.5 Distribute via Firebase App Distribution (Free)
+### 5.5 Distribute via Firebase App Distribution (Free)
 
 A middle ground — free, no store, but managed through Firebase.
 
@@ -199,10 +288,12 @@ Testers get an email invite to install. They'll need to enable "Install unknown 
 
 ---
 
-## 5. Quick Reference — Build Commands
+## 6. Quick Reference — Build Commands
 
 | Platform | Command | Output |
 |---|---|---|
+| Web dev | `flutter run -d chrome` | Runs in Chrome with hot-reload |
+| Web release | `flutter build web --release` | `build/web/` directory |
 | iOS dev | `flutter run` | Runs on simulator/device |
 | iOS release | `flutter build ios --release` | Xcode archive |
 | Android dev | `flutter run` | Runs on emulator/device |
@@ -211,7 +302,13 @@ Testers get an email invite to install. They'll need to enable "Install unknown 
 
 ---
 
-## 6. Family Member Onboarding Checklist
+## 7. Family Member Onboarding Checklist
+
+### Web Family Members
+- [ ] App is deployed to Firebase Hosting
+- [ ] Share the `.web.app` URL with family
+- [ ] They open the URL in Chrome (or any modern browser)
+- [ ] They enter the family passcode to access the home screen
 
 ### iOS Family Members
 - [ ] You have an Apple Developer account
@@ -229,7 +326,7 @@ Testers get an email invite to install. They'll need to enable "Install unknown 
 
 ---
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 ### iOS Build Takes Forever
 The first Xcode build with Firebase dependencies can take 10–20 minutes. Subsequent builds are much faster due to caching. Just wait.
