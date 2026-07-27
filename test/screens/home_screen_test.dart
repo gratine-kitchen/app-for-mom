@@ -162,6 +162,15 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
+    testWidgets('should have a games icon in the AppBar', (tester) async {
+      await tester.pumpWidget(buildTestApp(fakeService));
+      fakeService.emitEvents([]);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.games_outlined), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
+    });
+
     testWidgets('should show error state on stream error', (tester) async {
       await tester.pumpWidget(buildTestApp(fakeService));
       fakeService.emitError(Exception('Network error'));

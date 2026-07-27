@@ -6,6 +6,7 @@ import '../l10n/bilingual_date_formatter.dart';
 import '../models/event.dart';
 import '../services/firestore_service.dart';
 import 'add_event_sheet.dart';
+import 'games/game_selector_sheet.dart';
 
 /// Main screen displaying today's date in a large font and a list of
 /// upcoming shared events.
@@ -18,6 +19,17 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.games_outlined),
+            tooltip: AppStrings.gamesTooltip,
+            onPressed: () => GameSelectorSheet.show(context),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [

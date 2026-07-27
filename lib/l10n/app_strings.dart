@@ -83,4 +83,53 @@ class AppStrings {
 
   /// Wrong passcode error
   static const String wrongPasscode = '密碼錯誤，請重試。\nWrong passcode, please try again.';
+
+  // ---------------------------------------------------------------------------
+  // Games
+  // ---------------------------------------------------------------------------
+
+  /// Games button tooltip (AppBar)
+  static const String gamesTooltip = '小遊戲 / Games';
+
+  /// Game selector sheet title
+  static const String selectGame = '選擇遊戲\nSelect a Game';
+
+  // -- Math Quiz --
+
+  /// Math quiz game name
+  static const String mathQuizName = '數學算術 / Math Quiz';
+
+  /// Math quiz game description
+  static const String mathQuizDesc = '簡單加減法練習\nSimple addition & subtraction';
+
+  /// Quiz progress indicator (e.g. 第3/6題)
+  static String quizProgress(int current, int total) => '第$current/$total題';
+
+  /// Score display (e.g. ⭐ 4)
+  static String score(int correct) => '⭐ $correct';
+
+  /// Correct answer feedback
+  static const String correctAnswer = '正確！\nCorrect!';
+
+  /// Wrong answer feedback
+  static const String wrongAnswer = '不對哦\nNot quite';
+
+  /// Quiz result title
+  static const String quizComplete = '完成了！\nAll Done!';
+
+  /// Quiz result subtitle
+  static String quizScore(int correct, int total) =>
+      '你答對了$correct題！\nYou got $correct out of $total right!';
+
+  /// Play again button
+  static const String playAgain = '再玩一次 / Play Again';
+
+  /// Back navigation
+  static const String back = '返回 / Back';
+
+  /// Operator display for addition
+  static const String operatorAdd = '+';
+
+  /// Operator display for subtraction
+  static const String operatorSub = '−';
 }
