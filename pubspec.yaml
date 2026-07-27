@@ -45,8 +45,8 @@ dependencies:
   # Audio playback for game sound effects
   audioplayers: ^6.1.0
 
-  # YouTube video playback
-  youtube_player_flutter: ^9.1.1
+  # YouTube video playback (web + mobile)
+  youtube_player_iframe: ^5.2.0
 
 dev_dependencies:
   flutter_test:

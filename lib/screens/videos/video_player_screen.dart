@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../models/video.dart';
 
@@ -23,53 +23,32 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
     _controller = YoutubePlayerController(
-      initialVideoId: widget.video.youtubeId,
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        disableDragSeek: false,
-        loop: false,
+      params: const YoutubePlayerParams(
+        showControls: true,
+        showFullscreenButton: true,
       ),
     );
+    _controller.loadVideoById(videoId: widget.video.youtubeId);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.video.title),
       ),
-      body: YoutubePlayerBuilder(
-        player: YoutubePlayer(
+      body: SafeArea(
+        child: YoutubePlayer(
           controller: _controller,
-          showVideoProgressIndicator: true,
-          progressIndicatorColor: theme.colorScheme.primary,
-          progressColors: ProgressBarColors(
-            playedColor: theme.colorScheme.primary,
-            handleColor: theme.colorScheme.primary,
-          ),
+          aspectRatio: 16 / 9,
+          backgroundColor: Colors.black,
         ),
-        builder: (context, player) {
-          return Column(
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: player,
-              ),
-              Expanded(
-                child: Container(color: Colors.black),
-              ),
-            ],
-          );
-        },
       ),
     );
   }
