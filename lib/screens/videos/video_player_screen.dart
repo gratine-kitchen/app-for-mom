@@ -18,7 +18,6 @@ class VideoPlayerScreen extends StatefulWidget {
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
-  bool _isReady = false;
 
   @override
   void initState() {
@@ -32,12 +31,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         loop: false,
       ),
     );
-
-    _controller.addListener(() {
-      if (_controller.value.isReady && !_isReady) {
-        setState(() => _isReady = true);
-      }
-    });
   }
 
   @override
@@ -67,24 +60,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         builder: (context, player) {
           return Column(
             children: [
-              // 16:9 aspect ratio video player
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: _isReady
-                    ? player
-                    : Container(
-                        color: Colors.black,
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        ),
-                      ),
+                child: player,
               ),
-
-              // Spacer below the video (pushes video to the top)
               Expanded(
-                child: _isReady
-                    ? Container(color: Colors.black)
-                    : const SizedBox.shrink(),
+                child: Container(color: Colors.black),
               ),
             ],
           );
