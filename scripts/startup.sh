@@ -39,6 +39,12 @@ if ! xcrun simctl list devices &>/dev/null; then
 fi
 echo "  ✓ Xcode tools found"
 
+if ! command -v pod &> /dev/null; then
+    echo "ERROR: CocoaPods not found. Install it with: brew install cocoapods"
+    exit 1
+fi
+echo "  ✓ CocoaPods found"
+
 # ---- Install dependencies ----
 echo ""
 echo "[2/4] Installing Flutter dependencies..."
